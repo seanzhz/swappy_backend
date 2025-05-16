@@ -39,13 +39,17 @@ io.on('connection', (socket) => {
     socket.on('add_user',(customerId, userInfo)=>{
         addUser(customerId,socket.id,userInfo);
     })
+
 })
+
+
 
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use('/api',require('./routes/authRoutes'));
 app.use('/api',require('./routes/categoryRoutes'));
 app.use('/api',require('./routes/producrRoutes'));
+app.use('/api',require('./routes/chatRoutes'));
 
 app.get('/',(req, res) =>
     res.send('My first express server'));
