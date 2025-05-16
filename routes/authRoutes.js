@@ -11,7 +11,8 @@ router.post('/seller-login',authController.seller_login)
 
 // logout API endpoint
 router.post('/logout', authMiddleware, authController.logout);
-router.put('/update-user/:id', authMiddleware, upload.single('image'), authController.updateUserProfile);
 
+router.put('/update-user/:id', authMiddleware, upload.single('image'), authController.updateUserProfile);
+router.put('/update-account/:id', authMiddleware, authController.updateUserAccount);
 
 module.exports = router;

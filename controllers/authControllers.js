@@ -14,6 +14,7 @@ class authControllers {
         return responseReturn(res, 200, {message: 'logout'});
     }
 
+
     admin_login = async (req, res) => {
         const {email, password} = req.body;
 
@@ -132,6 +133,43 @@ class authControllers {
         } catch (error) {
             responseReturn(res, 500, {error: error.message})
         }
+    }
+
+    updateUserAccount = async (req, res) => {
+        try {
+            const userId = req.params.id;
+            const { newPassword,oldPassword } = req.body;
+
+            // ✅ 获取原用户数据（用于保留原头像）
+            const user = await sellerModel.findById(userId).select('+password');;
+            if (!user) {
+                return responseReturn(res, 404, {error: 'User not found'});
+            }
+
+            console.log('oldPassword:', oldPassword);
+            console.log('user.password:', user.password); // 更直接！
+
+            const match = await bcrypt.compare(oldPassword, user.get('password'));
+            // ✅ 更新用户数据
+            if(match) {
+                user.password = await bcrypt.hash(newPassword, 10)
+                await user.save();
+                responseReturn(res, 200, {
+                    message: 'Password has been updated successfully',
+                    user,
+                });
+            }else{
+                responseReturn(res, 500, {error: 'Invalid Password'});
+            }
+
+
+        }
+
+        catch (error) {
+            console.error('Profile update error:', error);
+            responseReturn(res, 500, {error: error.message});
+        }
+
     }
 
     updateUserProfile = async (req, res) => {
