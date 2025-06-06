@@ -118,17 +118,22 @@ class ChatController {
     // END
 
     send_message = async (req, res) => {
-        //console.log(req.body);
+
         const {userId,sellerId,content} = req.body;
 
+        //get io and allCustomer from req
+        const io = req.io;
+        const allCustomer = req.allCustomer;
+
         try{
+            //Store chat into Mango DB
             const message = await messageModel.create({
                 senderId: userId,
                 receiverId: sellerId,
                 message: content
             })
-            //responseReturn(res, 200, {message})
-            //Set new priority - actively
+
+            // update priority - actively
             const data = await sellerCustomerModel.findOne({
                 myId: userId
             })
@@ -146,7 +151,7 @@ class ChatController {
                 myFriendId: myFriends
             })
 
-            //passive update the priority
+            //receiver update the priority
             const data1 = await sellerCustomerModel.findOne({
                 myId: userId
             })
@@ -164,15 +169,28 @@ class ChatController {
                 myFriendId: myFriends1
             })
 
+            // broadcast to all online receiver
+            // find receiver ID from allCustomer
+            const recipient = allCustomer.find(item => item.customerId === sellerId);
+            if (recipient) {
+                io.to(recipient.socketId).emit("receive_message", {
+                    messageId: message._id,
+                    senderId: userId,
+                    receiverId: sellerId,
+                    content: message.message,
+                    createdAt: message.createdAt
+                });
+            }
+            //Return HTTP Response
             responseReturn(res, 201, {message})
         }
         catch (e) {
-
+            console.error("send_message error:", e);
+            responseReturn(res, 500, { error: "Failed to send message" });
         }
-
     }
 
-    // 新增：拉取历史消息
+    //fetch historical messages
     fetch_messages = async (req, res) => {
         const { userId, friendId } = req.body;
         try {
