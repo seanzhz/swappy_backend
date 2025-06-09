@@ -3,6 +3,32 @@ const productModel = require("../models/productModel");
 const {responseReturn} = require("../utilities/response");
 
 class ProductController {
+
+    previewProducts = async (req, res) => {
+        try {
+            // 按创建时间降序取最新 4 条
+            const products = await productModel
+                .find({})
+                .sort({ createdAt: -1 })
+                .limit(4)
+                .lean();
+
+            // 可选：计算总数，用于返回分页信息
+            const total = await productModel.countDocuments({});
+
+            return res.status(200).json({
+                products,
+                total,
+                page: 1,
+                limit: 4,
+                totalPages: Math.ceil(total / 4)
+            });
+        } catch (err) {
+            console.error("previewProducts error:", err);
+            return res.status(500).json({ error: "Failed to fetch preview products" });
+        }
+    }
+
     addProduct = async (req, res) => {
         try {
             const {

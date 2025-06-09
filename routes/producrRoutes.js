@@ -16,4 +16,10 @@ router.get('/get-product/:id', authMiddleware, productController.getSingleProduc
 router.put('/update-product/:id', authMiddleware, upload.array('images'), productController.updateProduct);
 router.get('/get-product', authMiddleware, productController.getProducts);
 
+// 2. 新增：公开接口（不需要 authMiddleware），只取前 4 条商品
+router.get(
+    "/preview-products",
+    productController.previewProducts
+);
+
 module.exports = router;
