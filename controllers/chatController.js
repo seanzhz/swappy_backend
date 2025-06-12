@@ -1,5 +1,5 @@
-const sellerModel = require("../models/sellerModel");
-const sellerCustomerModel = require("../models/sellerCustomerModel");
+const userModel = require("../models/userModel");
+const userChatModel = require("../models/userChatModel");
 const messageModel = require("../models/messageModel");
 const {responseReturn} = require("../utilities/response");
 
@@ -10,9 +10,9 @@ class ChatController {
 
         try{
             if(sellerId !== ''){
-                const seller = await sellerModel.findById(sellerId);
-                const user = await sellerModel.findById(userId);
-                const checkConnection = await sellerCustomerModel.findOne({
+                const seller = await userModel.findById(sellerId);
+                const user = await userModel.findById(userId);
+                const checkConnection = await userChatModel.findOne({
                     $and: [
                         {
                             myId: {
@@ -29,7 +29,7 @@ class ChatController {
                 });
 
                 if(!checkConnection){
-                    await sellerCustomerModel.updateOne({
+                    await userChatModel.updateOne({
                         myId: userId
                     },{
                         $push: {
@@ -45,7 +45,7 @@ class ChatController {
                 }
 
                 //PASSIVE ADD被动添加
-                const checkConnection_a = await sellerCustomerModel.findOne({
+                const checkConnection_a = await userChatModel.findOne({
                     $and: [
                         {
                             myId: {
@@ -62,7 +62,7 @@ class ChatController {
                 });
 
                 if(!checkConnection_a){
-                    await sellerCustomerModel.updateOne({
+                    await userChatModel.updateOne({
                         myId: sellerId
                     },{
                         $push: {
@@ -93,7 +93,7 @@ class ChatController {
                     ]
                 })
 
-                const myFriend = await sellerCustomerModel.findOne({
+                const myFriend = await userChatModel.findOne({
                     myId: userId
                 })
                 const currentFriend = myFriend.myFriendId.find(friend => friend.friendId === sellerId)
@@ -104,7 +104,7 @@ class ChatController {
                     message
                 })
             }else{
-                const myFriend = await sellerCustomerModel.findOne({
+                const myFriend = await userChatModel.findOne({
                     myId: userId
                 })
                 responseReturn(res, 200, {
@@ -134,7 +134,7 @@ class ChatController {
             })
 
             // update priority - actively
-            const data = await sellerCustomerModel.findOne({
+            const data = await userChatModel.findOne({
                 myId: userId
             })
             let myFriends = data.myFriendId;
@@ -145,14 +145,14 @@ class ChatController {
                 myFriends[index-1] = temp;
                 index--;
             }
-            await sellerCustomerModel.updateOne({
+            await userChatModel.updateOne({
                 myId: userId
             },{
                 myFriendId: myFriends
             })
 
             //receiver update the priority
-            const data1 = await sellerCustomerModel.findOne({
+            const data1 = await userChatModel.findOne({
                 myId: userId
             })
             let myFriends1 = data1.myFriendId;
@@ -163,7 +163,7 @@ class ChatController {
                 myFriends1[index1-1] = temp1;
                 index1--;
             }
-            await sellerCustomerModel.updateOne({
+            await userChatModel.updateOne({
                 myId: sellerId
             },{
                 myFriendId: myFriends1

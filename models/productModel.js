@@ -42,9 +42,9 @@ const productSchema = new Schema({
             type: String
         }
     ],
-    sellerId: {
+    userId: {
         type: Schema.Types.ObjectId,
-        ref: 'seller',
+        ref: 'user',
         required: true
     }
 }, { timestamps: true });

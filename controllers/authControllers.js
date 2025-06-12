@@ -1,5 +1,7 @@
 const adminModel = require('../models/adminModel');
 const sellerModel = require('../models/sellerModel');
+const userModel = require('../models/userModel');
+const userChatModel = require('../models/userChatModel');
 const sellerCustomerModel = require('../models/sellerCustomerModel');
 const {responseReturn} = require("../utilities/response");
 const bcrypt = require('bcrypt');
@@ -81,24 +83,55 @@ class authControllers {
         }
     }
 
+    //Register
+    user_register = async (req, res) => {
+        const {username, email, password} = req.body;
+        try {
+            const getUser = await userModel.findOne({email})
+            if (getUser) {
+                responseReturn(res, 404, {error: 'Email already exist'});
+            } else {
+                const user = await userModel.create({
+                    username,
+                    email,
+                    password: await bcrypt.hash(password, 10),
+                    method: "manually"
+                })
+                await userChatModel.create({
+                    myId: user.id
+                })
+
+                const token = await createToken({id: user.id, role: user.role})
+
+                res.cookie('accessToken', token, {
+                    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                })
+
+                responseReturn(res, 200, {token, message: 'Register Successfully'});
+            }
+        } catch (err) {
+            responseReturn(res, 500, {error: err.message});
+        }
+    }
+
 
     //
-    seller_login = async (req, res) => {
+    user_login = async (req, res) => {
         const {email, password} = req.body;
 
         try {
-            const seller = await sellerModel.findOne({
+            const user = await userModel.findOne({
                     email: email
                 }
             ).select('+password');
 
-            if (seller) {
-                const match = await bcrypt.compare(password, seller.get('password'));
+            if (user) {
+                const match = await bcrypt.compare(password, user.get('password'));
 
                 if (match) {
                     const token = await createToken({
-                        id: seller.get('_id'),
-                        role: seller.get('role')
+                        id: user.get('_id'),
+                        role: user.get('role')
                     })
                     res.cookie('accessToken', token, {
                             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -124,11 +157,11 @@ class authControllers {
         const {id, role} = req;
         try {
             if (role === 'admin') {
-                const user = await adminModel.findById(id)
-                responseReturn(res, 200, {userInfo: user})
+                const admin = await adminModel.findById(id)
+                responseReturn(res, 200, {userInfo: admin})
             } else {
-                const seller = await sellerModel.findById(id)
-                responseReturn(res, 200, {userInfo: seller})
+                const user = await userModel.findById(id)
+                responseReturn(res, 200, {userInfo: user})
             }
         } catch (error) {
             responseReturn(res, 500, {error: error.message})
@@ -141,13 +174,13 @@ class authControllers {
             const { newPassword,oldPassword } = req.body;
 
             // ✅ 获取原用户数据（用于保留原头像）
-            const user = await sellerModel.findById(userId).select('+password');;
+            const user = await userModel.findById(userId).select('+password');;
             if (!user) {
                 return responseReturn(res, 404, {error: 'User not found'});
             }
 
             console.log('oldPassword:', oldPassword);
-            console.log('user.password:', user.password); // 更直接！
+            console.log('user.password:', user.password);
 
             const match = await bcrypt.compare(oldPassword, user.get('password'));
             // ✅ 更新用户数据
@@ -193,7 +226,7 @@ class authControllers {
             }
 
             // ✅ 获取原用户数据（用于保留原头像）
-            const user = await sellerModel.findById(userId);
+            const user = await userModel.findById(userId);
             if (!user) {
                 return responseReturn(res, 404, {error: 'User not found'});
             }

@@ -43,16 +43,16 @@ const removeUser = (socketId) => {
 
 //manage socket connection
 io.on('connection', (socket) => {
-    console.log('Socket connected, id =', socket.id);
+    //console.log('Socket connected, id =', socket.id);
 
     socket.on('add_user', (customerId, userInfo) => {
         addUser(customerId, socket.id, userInfo);
-        console.log('Current Online users:', allCustomer);
+        //console.log('Current Online users:', allCustomer);
     });
 
     socket.on('disconnect', () => {
         removeUser(socket.id);
-        console.log('Socket disconnected:', socket.id);
+        //console.log('Socket disconnected:', socket.id);
     });
 
 })

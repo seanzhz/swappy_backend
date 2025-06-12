@@ -10,7 +10,7 @@ router.post(
     productController.addProduct
 );
 
-router.get('/corresponding-product', authMiddleware, productController.getSellerProducts);
+router.get('/corresponding-product', authMiddleware, productController.getUserProducts);
 router.delete('/delete-product/:_id', authMiddleware, productController.deleteProduct);
 router.get('/get-product/:id', authMiddleware, productController.getSingleProduct);
 router.put('/update-product/:id', authMiddleware, upload.array('images'), productController.updateProduct);

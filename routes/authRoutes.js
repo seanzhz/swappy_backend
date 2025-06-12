@@ -6,8 +6,8 @@ const productController = require("../controllers/productController");
 
 router.post('/admin-login',authController.admin_login)
 router.get('/get-user',authMiddleware, authController.getUser)
-router.post('/seller-register',authController.seller_register)
-router.post('/seller-login',authController.seller_login)
+router.post('/user-register',authController.user_register)
+router.post('/user-login',authController.user_login)
 
 // logout API endpoint
 router.post('/logout', authMiddleware, authController.logout);

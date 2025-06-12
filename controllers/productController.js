@@ -45,7 +45,7 @@ class ProductController {
                 )
             );
 
-            const sellerId = req.id
+            const userId = req.id
 
             // ✅ 创建产品
             const newProduct = await productModel.create({
@@ -58,7 +58,7 @@ class ProductController {
                 exchange: exchange === 'true',
                 wantItem: exchange === 'true' ? wantItem : '',
                 isSecret: isSecret === 'true',
-                sellerId: sellerId,
+                userId: userId,
                 promotionalImage: imageUrls
             });
 
@@ -73,10 +73,10 @@ class ProductController {
         }
     }
 
-    getSellerProducts = async (req, res) => {
+    getUserProducts = async (req, res) => {
         try {
-            const sellerId = req.id; // ✅ 通过 authMiddleware 注入
-            const products = await productModel.find({sellerId: sellerId}).populate('category');
+            const userId = req.id; // ✅ 通过 authMiddleware 注入
+            const products = await productModel.find({userId: userId}).populate('category');
             responseReturn(res, 200, {products});
         } catch (error) {
             responseReturn(res, 500, {error: error.message});
@@ -157,7 +157,7 @@ class ProductController {
 
 
         try {
-            const product = await productModel.findById(id).populate("category").populate('sellerId');
+            const product = await productModel.findById(id).populate("category").populate('userId');
 
             if (!product) {
                 return responseReturn(res, 404, {error: "Product not found"});
